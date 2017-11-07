@@ -1,12 +1,13 @@
 package com.example.android.myhotmovies.data;
 
-import java.io.Serializable;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 /**
  * Created by xie on 2017/11/6.
  */
 
-public class MovieDetail implements Serializable{
+public class MovieDetail implements Parcelable{
 
     private String _id;
     private String _title;
@@ -62,4 +63,43 @@ public class MovieDetail implements Serializable{
     public void setReleaseDate(String releaseDate) {
         this.releaseDate = releaseDate;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this._id);
+        dest.writeString(this._title);
+        dest.writeString(this.posterPath);
+        dest.writeString(this.voteAverage);
+        dest.writeString(this.overview);
+        dest.writeString(this.releaseDate);
+    }
+
+    public MovieDetail() {
+    }
+
+    protected MovieDetail(Parcel in) {
+        this._id = in.readString();
+        this._title = in.readString();
+        this.posterPath = in.readString();
+        this.voteAverage = in.readString();
+        this.overview = in.readString();
+        this.releaseDate = in.readString();
+    }
+
+    public static final Creator<MovieDetail> CREATOR = new Creator<MovieDetail>() {
+        @Override
+        public MovieDetail createFromParcel(Parcel source) {
+            return new MovieDetail(source);
+        }
+
+        @Override
+        public MovieDetail[] newArray(int size) {
+            return new MovieDetail[size];
+        }
+    };
 }

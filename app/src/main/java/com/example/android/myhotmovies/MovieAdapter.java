@@ -64,7 +64,11 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
 
     @Override
     public void onBindViewHolder(MovieAdapterViewHolder holder, int position) {
-        Picasso.with(mContext).load(Uri.parse(IMG_LOAD_PATH + mMovieDetails.get(position).getPosterPath())).into(holder.mMovieImageView);
+        Picasso.with(mContext)
+                .load(Uri.parse(IMG_LOAD_PATH + mMovieDetails.get(position).getPosterPath()))
+                .placeholder(R.mipmap.ic_launcher)
+                .error(R.mipmap.ic_launcher)
+                .into(holder.mMovieImageView);
     }
 
     @Override
