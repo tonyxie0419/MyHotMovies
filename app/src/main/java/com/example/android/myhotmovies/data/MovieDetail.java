@@ -3,25 +3,27 @@ package com.example.android.myhotmovies.data;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import org.litepal.crud.DataSupport;
+
 /**
  * Created by xie on 2017/11/6.
  */
 
-public class MovieDetail implements Parcelable{
+public class MovieDetail extends DataSupport implements Parcelable{
 
-    private String _id;
+    private String movieId;
     private String _title;
     private String posterPath;
     private String voteAverage;
     private String overview;
     private String releaseDate;
 
-    public String get_id() {
-        return _id;
+    public String getMovieId() {
+        return movieId;
     }
 
-    public void set_id(String _id) {
-        this._id = _id;
+    public void setMovieId(String movieId) {
+        this.movieId = movieId;
     }
 
     public String get_title() {
@@ -71,7 +73,7 @@ public class MovieDetail implements Parcelable{
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(this._id);
+        dest.writeString(this.movieId);
         dest.writeString(this._title);
         dest.writeString(this.posterPath);
         dest.writeString(this.voteAverage);
@@ -83,7 +85,7 @@ public class MovieDetail implements Parcelable{
     }
 
     protected MovieDetail(Parcel in) {
-        this._id = in.readString();
+        this.movieId = in.readString();
         this._title = in.readString();
         this.posterPath = in.readString();
         this.voteAverage = in.readString();

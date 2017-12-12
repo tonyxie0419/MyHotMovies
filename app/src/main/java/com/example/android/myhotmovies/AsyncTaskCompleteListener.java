@@ -7,5 +7,5 @@ import java.util.ArrayList;
  */
 
 public interface AsyncTaskCompleteListener {
-    public void onTaskComplete(ArrayList result);
+    void onTaskComplete(ArrayList result, int requestCode);
 }

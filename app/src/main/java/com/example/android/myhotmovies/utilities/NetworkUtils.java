@@ -24,9 +24,59 @@ public class NetworkUtils {
 
     public static final String QUERY_TOP_RATED_MOVIES_URL = "https://api.themoviedb.org/3/movie/top_rated";
 
+    public static final String QUERY_URL = "http://api.themoviedb.org/3/movie";
+
+    public static final String YOUTUBE_URL = "http://www.youtube.com/watch";
+
     final static String QUERY_API_KEY = "api_key";
 
-    public static URL buildUrl(String queryCategory) {
+    final static String QUERY_VIDEO = "v";
+
+    final static String QUERY_VIDEOS = "videos";
+    final static String QUERY_REVIEWS = "reviews";
+
+    public static URL buildQueryTrailerKeyUrl(String movieId) {
+        Uri builtUri = Uri.parse(QUERY_URL).buildUpon()
+                .appendEncodedPath(movieId)
+                .appendEncodedPath(QUERY_VIDEOS)
+                .appendQueryParameter(QUERY_API_KEY, MyApiKey.API_KEY)
+                .build();
+
+        URL url = null;
+        try {
+            url = new URL(builtUri.toString());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+        Log.d(TAG, "buildUrl: " + url);
+        return url;
+    }
+
+    public static URL buildQueryReviewUrl(String movieId) {
+        Uri builtUri = Uri.parse(QUERY_URL).buildUpon()
+                .appendEncodedPath(movieId)
+                .appendEncodedPath(QUERY_REVIEWS)
+                .appendQueryParameter(QUERY_API_KEY, MyApiKey.API_KEY)
+                .build();
+
+        URL url = null;
+        try {
+            url = new URL(builtUri.toString());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+        Log.d(TAG, "buildUrl: " + url);
+        return url;
+    }
+
+    public static Uri buildYoutubeUri(String videoKey) {
+        Uri builtUri = Uri.parse(YOUTUBE_URL).buildUpon()
+                .appendQueryParameter(QUERY_VIDEO, videoKey)
+                .build();
+        return builtUri;
+    }
+
+    public static URL buildQueryUrl(String queryCategory) {
         Uri builtUri = Uri.parse(queryCategory).buildUpon()
                 .appendQueryParameter(QUERY_API_KEY, MyApiKey.API_KEY)
                 .build();
@@ -42,6 +92,7 @@ public class NetworkUtils {
         return url;
     }
 
+    //用了okhttp3以后放弃用此方法
     public static String getResponseFromHttpUrl(URL url) throws IOException {
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         urlConnection.setConnectTimeout(5000);

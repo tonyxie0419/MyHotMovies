@@ -12,10 +12,20 @@
         android:id="@+id/tv_error_message_display"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="@dimen/padding"
         android:text="@string/error_message"
         android:textSize="@dimen/text_size_20"
         android:visibility="invisible" />
+
+    <TextView
+        android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+        android:visibility="invisible"
+        android:gravity="center"
+        android:text="@string/no_favorite_movies"
+        android:textSize="@dimen/text_size_28"
+        android:id="@+id/tv_no_favorite_movies_display"
+        android:layout_gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
     <ProgressBar
         android:id="@+id/pb_loading_indicator"

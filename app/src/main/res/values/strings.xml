@@ -1,9 +1,23 @@
 <resources>
-    <string name="app_name">MyHotMovies</string>
+    <string name="app_name">热门电影</string>
     <string name="error_message">An error has occurred. Please try again.</string>
     <string name="action_popular_refresh">按最受欢迎排序</string>
     <string name="action_top_rated_refresh">按评分最高排序</string>
     <string name="overview">剧情简介：</string>
     <string name="vote_average">用户评分：</string>
     <string name="release_date">上映日期：</string>
+    <string name="detail_title">Title</string>
+    <string name="overview_default">In a small town in Maine, seven children known as The Losers Club come face to face with life problems, bullies and a monster that takes the shape of a clown called Pennywise.</string>
+    <string name="release_date_default">2017-09-05</string>
+    <string name="vote_average_default">7.3</string>
+    <string name="trailers">预告片:</string>
+    <string name="trailers_default">Trailer 1</string>
+    <string name="trailers_text">预告片</string>
+    <string name="reviews">评论：</string>
+    <string name="review_author_default">Screen-Space</string>
+    <string name="review_content_default">Skarsgård goes to hell and back to craft a truly malevolent creation, utterly believable as the black soul of King’s cursed small town...Read the full review here: http://screen-space.squarespace.com/reviews/2017/9/6/it.html","url":"https://www.themoviedb.org/review/59afaa2cc3a3682e6401064f</string>
+    <string name="favorite_movie">收藏的电影</string>
+    <string name="popular_movies">热门电影（按欢迎度排序）</string>
+    <string name="rated_movies">热门电影（按评分排序）</string>
+    <string name="no_favorite_movies">没有收藏的电影</string>
 </resources>

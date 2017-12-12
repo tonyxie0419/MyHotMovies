@@ -1,13 +1,13 @@
 package com.example.android.myhotmovies.utilities;
 
 import com.example.android.myhotmovies.data.MovieDetail;
+import com.example.android.myhotmovies.data.MovieReview;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by xie on 2017/11/3.
@@ -34,7 +34,6 @@ public class OpenMovieJsonUtils {
         JSONArray movieArray = movieJson.getJSONArray(QUERY_RESULTS);
 
         for (int i = 0; i < movieArray.length(); i++) {
-            //TODO id以后有用
             MovieDetail movieDetail = new MovieDetail();
             String id;
             String posterPath;
@@ -49,7 +48,7 @@ public class OpenMovieJsonUtils {
             overview = movieData.getString(QUERY_OVERVIEW);
             releaseDate = movieData.getString(QUERY_RELEASE_DATE);
             title = movieData.getString(QUERY_TITLE);
-            movieDetail.set_id(id);
+            movieDetail.setMovieId(id);
             movieDetail.set_title(title);
             movieDetail.setOverview(overview);
             movieDetail.setPosterPath(posterPath);
@@ -58,5 +57,51 @@ public class OpenMovieJsonUtils {
             mMovieDetailList.add(movieDetail);
         }
         return mMovieDetailList;
+    }
+
+    public static ArrayList<String> getSimpleMovieTrailersKeyStringsFromJson(String movieTrailersKeysJsonStr) throws JSONException {
+
+        final String QUERY_RESULTS = "results";
+        final String QUERY_TRAILERS_KEY = "key";
+
+        ArrayList<String> mMovieTrailersKeys = new ArrayList<>();
+
+        JSONObject movieTrailersKeysJson = new JSONObject(movieTrailersKeysJsonStr);
+
+        JSONArray movieTrailersKeysArray = movieTrailersKeysJson.getJSONArray(QUERY_RESULTS);
+
+        for (int i = 0; i < movieTrailersKeysArray.length(); i++) {
+            String trailersKey;
+            JSONObject movieTrailersData = movieTrailersKeysArray.getJSONObject(i);
+            trailersKey = movieTrailersData.getString(QUERY_TRAILERS_KEY);
+            mMovieTrailersKeys.add(trailersKey);
+        }
+        return mMovieTrailersKeys;
+    }
+
+    public static ArrayList<MovieReview> getSimpleMovieReviewStringsFromJson(String movieReviewsJsonStr) throws JSONException {
+
+        final String QUERY_RESULTS = "results";
+        final String QUERY_AUTHOR = "author";
+        final String QUERY_CONTENT = "content";
+
+        ArrayList<MovieReview> mMovieReviews = new ArrayList<>();
+
+        JSONObject movieReviewsJson = new JSONObject(movieReviewsJsonStr);
+
+        JSONArray movieReviewsArray = movieReviewsJson.getJSONArray(QUERY_RESULTS);
+
+        for (int i = 0; i < movieReviewsArray.length(); i++) {
+            String author;
+            String content;
+            MovieReview movieReview = new MovieReview();
+            JSONObject movieReviewsData = movieReviewsArray.getJSONObject(i);
+            author = movieReviewsData.getString(QUERY_AUTHOR);
+            content = movieReviewsData.getString(QUERY_CONTENT);
+            movieReview.setAuthor(author);
+            movieReview.setContent(content);
+            mMovieReviews.add(movieReview);
+        }
+        return mMovieReviews;
     }
 }

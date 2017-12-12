@@ -9,4 +9,8 @@
         android:id="@+id/action_top_rated_refresh"
         android:title="@string/action_top_rated_refresh"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/action_favorite_movie"
+        android:title="@string/favorite_movie"
+        app:showAsAction="never" />
 </menu>
