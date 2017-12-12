@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/iv_play_trailer"
+        android:layout_width="@dimen/iv_play_trailer_width"
+        android:layout_height="@dimen/iv_play_trailer_height"
+        android:layout_marginBottom="@dimen/tv_margin_bottom"
+        android:layout_marginStart="@dimen/tv_margin_left"
+        android:layout_marginLeft="@dimen/tv_margin_left"
+        android:layout_marginTop="@dimen/margin_top_16"
+        android:background="@color/detail_title"
+        android:src="@android:drawable/ic_media_play"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:layout_marginEnd="@dimen/tv_margin_left"
+        android:layout_marginRight="@dimen/tv_margin_left"
+        android:id="@+id/tv_display_trailer_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/tv_margin_left"
+        android:layout_marginStart="@dimen/tv_margin_left"
+        android:textSize="@dimen/text_size_16"
+        app:layout_constraintBottom_toBottomOf="@+id/iv_play_trailer"
+        app:layout_constraintLeft_toRightOf="@+id/iv_play_trailer"
+        app:layout_constraintTop_toTopOf="@+id/iv_play_trailer"
+        app:layout_constraintRight_toRightOf="parent"
+        tools:text="@string/trailers_default" />
+
+</android.support.constraint.ConstraintLayout>
