@@ -1,14 +1,14 @@
 package com.example.android.myhotmovies.sync;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.os.AsyncTask;
 
-import com.example.android.myhotmovies.AsyncTaskCompleteListener;
 import com.example.android.myhotmovies.data.MovieDetail;
+import com.example.android.myhotmovies.provider.DatabaseContract;
 import com.example.android.myhotmovies.utilities.NetworkUtils;
 import com.example.android.myhotmovies.utilities.OpenMovieJsonUtils;
-import com.example.android.myhotmovies.utilities.SyncTaskUtils;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 
@@ -24,8 +24,12 @@ import okhttp3.Response;
 public class FetchMovieDetailTask extends AsyncTask<String, Void, ArrayList<MovieDetail>> {
 
     private AsyncTaskCompleteListener mListener;
+    @SuppressLint("StaticFieldLeak")
+    private Context mContext;
+    private String type;
 
-    public FetchMovieDetailTask(AsyncTaskCompleteListener listener) {
+    public FetchMovieDetailTask(Context context, AsyncTaskCompleteListener listener) {
+        mContext = context;
         mListener = listener;
     }
 
@@ -42,29 +46,40 @@ public class FetchMovieDetailTask extends AsyncTask<String, Void, ArrayList<Movi
             return null;
         }
 
-        String queryCategory = strings[0];
-        URL movieRequestUrl = NetworkUtils.buildQueryUrl(queryCategory);
-
-        OkHttpClient okHttpClient = new OkHttpClient();
-        Request request = new Request.Builder()
-                .url(movieRequestUrl)
-                .build();
-
-        Call call = okHttpClient.newCall(request);
-
-        try {
-            Response response = call.execute();
-            String jsonMovieResponse = response.body().string();
-
-            return OpenMovieJsonUtils.getSimpleMovieStringsFromJson(jsonMovieResponse);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+        type = strings[0];
+        URL movieRequestUrl = null;
+        switch (type) {
+            case DatabaseContract.TYPE_POPULAR:
+                movieRequestUrl = NetworkUtils.buildQueryUrl(NetworkUtils.QUERY_POPULAR_MOVIES_URL);
+                break;
+            case DatabaseContract.TYPE_TOP_RATED:
+                movieRequestUrl = NetworkUtils.buildQueryUrl(NetworkUtils.QUERY_TOP_RATED_MOVIES_URL);
+                break;
         }
+
+        if (movieRequestUrl != null) {
+            OkHttpClient okHttpClient = new OkHttpClient();
+            Request request = new Request.Builder()
+                    .url(movieRequestUrl)
+                    .build();
+
+            Call call = okHttpClient.newCall(request);
+
+            try {
+                Response response = call.execute();
+                String jsonMovieResponse = response.body().string();
+
+                return OpenMovieJsonUtils.getSimpleMovieStringsFromJson(mContext, jsonMovieResponse);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+        return null;
     }
 
     @Override
     protected void onPostExecute(ArrayList<MovieDetail> movieDetails) {
-        mListener.onTaskComplete(movieDetails, SyncTaskUtils.CODE_MOVIE_DETAIL);
+        mListener.onTaskComplete(movieDetails, type);
     }
 }

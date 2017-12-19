@@ -6,4 +6,6 @@
 
     <color name="action_bar">#212121</color>
     <color name="detail_title">#3E9186</color>
+    <color name="text_color_white">@android:color/white</color>
+    <color name="divider_color">@android:color/darker_gray</color>
 </resources>

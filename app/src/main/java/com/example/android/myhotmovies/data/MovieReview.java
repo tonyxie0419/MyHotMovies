@@ -3,8 +3,6 @@ package com.example.android.myhotmovies.data;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import org.litepal.crud.DataSupport;
-
 /**
  * Created by xie on 2017/12/6.
  */

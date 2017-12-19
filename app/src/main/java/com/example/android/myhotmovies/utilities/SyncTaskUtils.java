@@ -1,6 +1,8 @@
 package com.example.android.myhotmovies.utilities;
 
-import com.example.android.myhotmovies.AsyncTaskCompleteListener;
+import android.content.Context;
+
+import com.example.android.myhotmovies.sync.AsyncTaskCompleteListener;
 import com.example.android.myhotmovies.sync.FetchMovieDetailTask;
 import com.example.android.myhotmovies.sync.FetchMovieReviewTask;
 import com.example.android.myhotmovies.sync.FetchMovieTrailerTask;
@@ -10,21 +12,16 @@ import com.example.android.myhotmovies.sync.FetchMovieTrailerTask;
  */
 
 public class SyncTaskUtils {
-    public static final int CODE_MOVIE_DETAIL = 1;
-    public static final int CODE_MOVIE_TRAILER = 2;
-    public static final int CODE_MOVIE_REVIEW = 3;
 
-    public static void syncMovie(AsyncTaskCompleteListener listener, String queryCategory, int requestCode) {
-        switch (requestCode) {
-            case CODE_MOVIE_DETAIL:
-                new FetchMovieDetailTask(listener).execute(queryCategory);
-                break;
-            case CODE_MOVIE_TRAILER:
-                new FetchMovieTrailerTask(listener).execute(queryCategory);
-                break;
-            case CODE_MOVIE_REVIEW:
-                new FetchMovieReviewTask(listener).execute(queryCategory);
-                break;
-        }
+    public static void syncMovieDetail(Context context, AsyncTaskCompleteListener listener, String type) {
+        new FetchMovieDetailTask(context, listener).execute(type);
+    }
+
+    public static void syncMovieTrailer(AsyncTaskCompleteListener listener, String movieId) {
+        new FetchMovieTrailerTask(listener).execute(movieId);
+    }
+
+    public static void syncMovieReview(AsyncTaskCompleteListener listener, String movieId) {
+        new FetchMovieReviewTask(listener).execute(movieId);
     }
 }

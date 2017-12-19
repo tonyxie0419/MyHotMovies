@@ -1,4 +1,4 @@
-package com.example.android.myhotmovies;
+package com.example.android.myhotmovies.ui;
 
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
@@ -13,17 +13,18 @@ import android.util.Log;
 import android.view.View;
 import android.widget.CompoundButton;
 
+import com.example.android.myhotmovies.sync.AsyncTaskCompleteListener;
+import com.example.android.myhotmovies.R;
 import com.example.android.myhotmovies.adapter.MovieReviewAdapter;
 import com.example.android.myhotmovies.adapter.MovieTrailerAdapter;
 import com.example.android.myhotmovies.data.MovieDetail;
 import com.example.android.myhotmovies.databinding.ActivityDetailBinding;
+import com.example.android.myhotmovies.provider.DatabaseContract;
+import com.example.android.myhotmovies.utilities.DatabaseUtils;
 import com.example.android.myhotmovies.utilities.SyncTaskUtils;
 import com.squareup.picasso.Picasso;
 
-import org.litepal.crud.DataSupport;
-
 import java.util.ArrayList;
-import java.util.List;
 
 public class DetailActivity extends AppCompatActivity implements AsyncTaskCompleteListener, CompoundButton.OnCheckedChangeListener {
 
@@ -33,6 +34,7 @@ public class DetailActivity extends AppCompatActivity implements AsyncTaskComple
 
     private MovieDetail movieDetail;
     private String movieId;
+    private MovieDetail queryMovieDetail;
 
     private RecyclerView mTrailerRecyclerView;
     private MovieTrailerAdapter mMovieTrailerAdapter;
@@ -43,20 +45,19 @@ public class DetailActivity extends AppCompatActivity implements AsyncTaskComple
     final String TRANS_DETAIL = "movie_detail";
     final String IMG_LOAD_PATH = "http://image.tmdb.org/t/p/w185/";
 
-    final String DATABASE_QUERY_CONDITIONS = "movieId = ?";
     public static boolean CHECKED_CHANGED = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_detail);
-        mBinding.cbFavorite.setOnCheckedChangeListener(this);
+
         Intent intentWithMovieDetail = getIntent();
         if (intentWithMovieDetail != null) {
             if (intentWithMovieDetail.hasExtra(TRANS_DETAIL)) {
                 //设置详情页
                 movieDetail = intentWithMovieDetail.getParcelableExtra(TRANS_DETAIL);
-                mBinding.tvDisplayMovieTitle.setText(movieDetail.get_title());
+                mBinding.tvDisplayMovieTitle.setText(movieDetail.getMovieTitle());
                 Picasso.with(this).load(Uri.parse(IMG_LOAD_PATH + movieDetail.getPosterPath())).into(mBinding.ivMoviePoster);
                 mBinding.overviewInfo.tvDisplayMovieOverview.setText(movieDetail.getOverview());
                 mBinding.extraDetailInfo.tvDisplayVoteAverage.setText(movieDetail.getVoteAverage());
@@ -66,11 +67,17 @@ public class DetailActivity extends AppCompatActivity implements AsyncTaskComple
                 hideViews();
 
                 movieId = movieDetail.getMovieId();
-                if (queryDataById(movieId).size() != 0) {
+                Log.d(TAG, "movieId: " + movieId);
+                queryMovieDetail = queryDataById(movieId, DatabaseContract.TYPE_FAVORITE);
+                //从数据库中根据ID查询TYPE为TYPE_FAVORITE的电影
+                if (queryMovieDetail != null) {
+                    Log.d(TAG, "queryMovieDetail: " + queryMovieDetail.getMovieId());
                     mBinding.cbFavorite.setChecked(true);
                 }
-                SyncTaskUtils.syncMovie(this, movieId, SyncTaskUtils.CODE_MOVIE_TRAILER);
-                SyncTaskUtils.syncMovie(this, movieId, SyncTaskUtils.CODE_MOVIE_REVIEW);
+                mBinding.cbFavorite.setOnCheckedChangeListener(this);
+
+                SyncTaskUtils.syncMovieTrailer(this, movieId);
+                SyncTaskUtils.syncMovieReview(this, movieId);
 
                 //设置预告片
                 mTrailerRecyclerView = findViewById(R.id.rv_movie_trailers);
@@ -95,26 +102,26 @@ public class DetailActivity extends AppCompatActivity implements AsyncTaskComple
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         if (isChecked) {
-            if (queryDataById(movieId).size() == 0) {
-                movieDetail.save();
+            if (queryMovieDetail == null) {
+                Log.d(TAG, "onCheckedChanged: saveMovieToDatabase");
+                DatabaseUtils.saveMovieToDatabase(this, movieDetail, DatabaseContract.TYPE_FAVORITE);
             }
         } else {
-            DataSupport.deleteAll(MovieDetail.class, DATABASE_QUERY_CONDITIONS, movieId);
-            movieDetail.clearSavedState();
+            DatabaseUtils.deleteMovieByIdFromDatabase(this, movieId, DatabaseContract.TYPE_FAVORITE);
         }
         CHECKED_CHANGED = true;
     }
 
     @Override
-    public void onTaskComplete(ArrayList result, int requestCode) {
-        switch (requestCode) {
-            case SyncTaskUtils.CODE_MOVIE_TRAILER:
+    public void onTaskComplete(ArrayList result, String type) {
+        switch (type) {
+            case DatabaseContract.TYPE_TRAILER:
                 if (result != null) {
                     mMovieTrailerAdapter.setMovieTrailersKeys(result);
                     mBinding.trailersInfo.rvMovieTrailers.setVisibility(View.VISIBLE);
                 }
                 break;
-            case SyncTaskUtils.CODE_MOVIE_REVIEW:
+            case DatabaseContract.TYPE_REVIEW:
                 if (result != null) {
                     mMovieReviewAdapter.setMovieReviews(result);
                     mBinding.reviewsInfo.rvMovieReviews.setVisibility(View.VISIBLE);
@@ -128,7 +135,7 @@ public class DetailActivity extends AppCompatActivity implements AsyncTaskComple
         mBinding.reviewsInfo.rvMovieReviews.setVisibility(View.INVISIBLE);
     }
 
-    private List<MovieDetail> queryDataById(String movieId) {
-        return DataSupport.where(DATABASE_QUERY_CONDITIONS, movieId).find(MovieDetail.class);
+    private MovieDetail queryDataById(String movieId, String type) {
+        return DatabaseUtils.queryMovieByIdFromDatabase(this, movieId, type);
     }
 }

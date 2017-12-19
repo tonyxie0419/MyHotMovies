@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
@@ -10,5 +10,16 @@
 
     <style name="CustomCheckboxTheme" parent="@android:style/Widget.CompoundButton.Star">
         <item name="android:background">@drawable/mark_bg</item>
+    </style>
+
+    <style name="Divider">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">@dimen/divider_height</item>
+        <item name="android:layout_marginLeft">@dimen/tv_margin_left</item>
+        <item name="android:layout_marginStart" tools:ignore="NewApi">@dimen/tv_margin_left</item>
+        <item name="android:layout_marginRight">@dimen/tv_margin_right</item>
+        <item name="android:layout_marginEnd" tools:ignore="NewApi">@dimen/tv_margin_right</item>
+        <item name="android:layout_marginTop">@dimen/margin_top_16</item>
+        <item name="android:background">@color/divider_color</item>
     </style>
 </resources>

@@ -1,4 +1,4 @@
-package com.example.android.myhotmovies;
+package com.example.android.myhotmovies.sync;
 
 import java.util.ArrayList;
 
@@ -7,5 +7,5 @@ import java.util.ArrayList;
  */
 
 public interface AsyncTaskCompleteListener {
-    void onTaskComplete(ArrayList result, int requestCode);
+    void onTaskComplete(ArrayList result, String type);
 }

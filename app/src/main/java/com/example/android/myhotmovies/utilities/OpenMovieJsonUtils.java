@@ -1,5 +1,7 @@
 package com.example.android.myhotmovies.utilities;
 
+
+import android.content.Context;
 import com.example.android.myhotmovies.data.MovieDetail;
 import com.example.android.myhotmovies.data.MovieReview;
 
@@ -9,6 +11,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
+
 /**
  * Created by xie on 2017/11/3.
  */
@@ -17,15 +20,23 @@ public class OpenMovieJsonUtils {
 
     private static final String TAG = OpenMovieJsonUtils.class.getSimpleName();
 
-    public static ArrayList<MovieDetail> getSimpleMovieStringsFromJson(String movieJsonStr) throws JSONException {
+    private static final String QUERY_MOVIE_ID = "id";
+    private static final String QUERY_POSTER_PATH = "poster_path";
+    private static final String QUERY_VOTE_AVERAGE = "vote_average";
+    private static final String QUERY_MOVIE_TITLE = "title";
+    private static final String QUERY_OVERVIEW = "overview";
+    private static final String QUERY_RELEASE_DATE = "release_date";
+
+    public static ArrayList<MovieDetail> getSimpleMovieStringsFromJson(Context context, String movieJsonStr) throws JSONException {
 
         final String QUERY_RESULTS = "results";
-        final String QUERY_ID = "id";
-        final String QUERY_POSTER_PATH = "poster_path";
-        final String QUERY_VOTE_AVERAGE = "vote_average";
-        final String QUERY_TITLE = "title";
-        final String QUERY_OVERVIEW = "overview";
-        final String QUERY_RELEASE_DATE = "release_date";
+
+        String movieId;
+        String posterPath;
+        String voteAverage;
+        String overview;
+        String releaseDate;
+        String movieTitle;
 
         ArrayList<MovieDetail> mMovieDetailList = new ArrayList();
 
@@ -35,21 +46,15 @@ public class OpenMovieJsonUtils {
 
         for (int i = 0; i < movieArray.length(); i++) {
             MovieDetail movieDetail = new MovieDetail();
-            String id;
-            String posterPath;
-            String voteAverage;
-            String overview;
-            String releaseDate;
-            String title;
             JSONObject movieData = movieArray.getJSONObject(i);
-            id = movieData.getString(QUERY_ID);
+            movieId = movieData.getString(QUERY_MOVIE_ID);
             posterPath = movieData.getString(QUERY_POSTER_PATH);
             voteAverage = movieData.getString(QUERY_VOTE_AVERAGE);
             overview = movieData.getString(QUERY_OVERVIEW);
             releaseDate = movieData.getString(QUERY_RELEASE_DATE);
-            title = movieData.getString(QUERY_TITLE);
-            movieDetail.setMovieId(id);
-            movieDetail.set_title(title);
+            movieTitle = movieData.getString(QUERY_MOVIE_TITLE);
+            movieDetail.setMovieId(movieId);
+            movieDetail.setMovieTitle(movieTitle);
             movieDetail.setOverview(overview);
             movieDetail.setPosterPath(posterPath);
             movieDetail.setReleaseDate(releaseDate);

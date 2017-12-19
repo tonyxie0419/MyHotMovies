@@ -5,15 +5,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import com.example.android.myhotmovies.DetailActivity;
+import com.example.android.myhotmovies.ui.DetailActivity;
+import com.example.android.myhotmovies.provider.OkHttp3Downloader;
 import com.example.android.myhotmovies.R;
 import com.example.android.myhotmovies.data.MovieDetail;
+//import com.jakewharton.picasso.OkHttp3Downloader;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
 
     private ArrayList<MovieDetail> mMovieDetails;
     private Context mContext;
+    private String mType;
     final String IMG_LOAD_PATH = "http://image.tmdb.org/t/p/w500/";
     final String TRANS_DETAIL = "movie_detail";
 
@@ -68,8 +70,8 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
     @SuppressLint("NewApi")
     @Override
     public void onBindViewHolder(MovieAdapterViewHolder holder, int position) {
-        Picasso.with(mContext)
-                .load(Uri.parse(IMG_LOAD_PATH + mMovieDetails.get(position).getPosterPath()))
+        Picasso picasso = new Picasso.Builder(mContext).downloader(new OkHttp3Downloader(mContext, mType)).build();
+        picasso.load(Uri.parse(IMG_LOAD_PATH + mMovieDetails.get(position).getPosterPath()))
                 .placeholder(R.mipmap.ic_launcher)
                 .error(R.mipmap.ic_launcher)
                 .into(holder.mMovieImageView);
@@ -87,8 +89,9 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
      *
      * @param movieDetails 用来存放查询获得的电影数据
      */
-    public void setMovieData(ArrayList<MovieDetail> movieDetails) {
+    public void setMovieData(ArrayList<MovieDetail> movieDetails, String type) {
         mMovieDetails = movieDetails;
+        mType = type;
         notifyDataSetChanged();
     }
 }

@@ -2,11 +2,10 @@ package com.example.android.myhotmovies.sync;
 
 import android.os.AsyncTask;
 
-import com.example.android.myhotmovies.AsyncTaskCompleteListener;
 import com.example.android.myhotmovies.data.MovieReview;
+import com.example.android.myhotmovies.provider.DatabaseContract;
 import com.example.android.myhotmovies.utilities.NetworkUtils;
 import com.example.android.myhotmovies.utilities.OpenMovieJsonUtils;
-import com.example.android.myhotmovies.utilities.SyncTaskUtils;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -56,6 +55,6 @@ public class FetchMovieReviewTask extends AsyncTask<String, Void, ArrayList<Movi
 
     @Override
     protected void onPostExecute(ArrayList<MovieReview> movieReviews) {
-        mListener.onTaskComplete(movieReviews, SyncTaskUtils.CODE_MOVIE_REVIEW);
+        mListener.onTaskComplete(movieReviews, DatabaseContract.TYPE_REVIEW);
     }
 }

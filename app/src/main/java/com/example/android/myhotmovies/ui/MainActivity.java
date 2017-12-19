@@ -1,4 +1,4 @@
-package com.example.android.myhotmovies;
+package com.example.android.myhotmovies.ui;
 
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -15,15 +16,16 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.example.android.myhotmovies.sync.AsyncTaskCompleteListener;
+import com.example.android.myhotmovies.R;
 import com.example.android.myhotmovies.adapter.MovieAdapter;
 import com.example.android.myhotmovies.data.MovieDetail;
+import com.example.android.myhotmovies.provider.DatabaseContract;
+import com.example.android.myhotmovies.utilities.DatabaseUtils;
 import com.example.android.myhotmovies.utilities.NetworkUtils;
 import com.example.android.myhotmovies.utilities.SyncTaskUtils;
 
-import org.litepal.crud.DataSupport;
-
 import java.util.ArrayList;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements AsyncTaskCompleteListener {
 
@@ -40,10 +42,10 @@ public class MainActivity extends AppCompatActivity implements AsyncTaskComplete
     private int lastOffset = 0;
     private int lastPosition = 0;
 
-    public static final String TYPE_POPULAR = "popular";
-    public static final String TYPE_TOP_RATED = "top_rated";
-    public static final String TYPE_DEFAULT = TYPE_POPULAR;
-    public static final String TYPE_FAVORITE = "favorite";
+    public static final String TYPE_DEFAULT = DatabaseContract.TYPE_POPULAR;
+
+    public static final String PREF_KEY_NOW = "now";
+    public static final String PREF_VALUE_DEFAULT = "default";
 
     final String SAVED_LAST_POSITION = "saved_last_position";
 
@@ -51,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements AsyncTaskComplete
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         mRecyclerView = findViewById(R.id.rv_movies);
         mErrorMessageDisplay = findViewById(R.id.tv_error_message_display);
         mLoadingIndicator = findViewById(R.id.pb_loading_indicator);
@@ -77,16 +80,16 @@ public class MainActivity extends AppCompatActivity implements AsyncTaskComplete
             }
         });
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        String type = sharedPreferences.getString("now", "default");
+        String type = sharedPreferences.getString(PREF_KEY_NOW, PREF_VALUE_DEFAULT);
         switch (type) {
-            case TYPE_POPULAR:
-                loadMovieData(TYPE_POPULAR);
+            case DatabaseContract.TYPE_POPULAR:
+                loadMovieData(DatabaseContract.TYPE_POPULAR);
                 break;
-            case TYPE_TOP_RATED:
-                loadMovieData(TYPE_TOP_RATED);
+            case DatabaseContract.TYPE_TOP_RATED:
+                loadMovieData(DatabaseContract.TYPE_TOP_RATED);
                 break;
-            case TYPE_FAVORITE:
-                loadMovieData(TYPE_FAVORITE);
+            case DatabaseContract.TYPE_FAVORITE:
+                loadMovieData(DatabaseContract.TYPE_FAVORITE);
                 break;
             default:
                 loadMovieData(TYPE_DEFAULT);
@@ -124,36 +127,52 @@ public class MainActivity extends AppCompatActivity implements AsyncTaskComplete
     private void loadMovieData(String type) {
         mLoadingIndicator.setVisibility(View.VISIBLE);
         switch (type) {
-            case TYPE_POPULAR:
-                mNoFavoriteMoviesDisplay.setVisibility(View.INVISIBLE);
-                SyncTaskUtils.syncMovie(this, NetworkUtils.QUERY_POPULAR_MOVIES_URL, SyncTaskUtils.CODE_MOVIE_DETAIL);
+            case DatabaseContract.TYPE_POPULAR:
+                if (NetworkUtils.isNetworkConnected(this)) {
+                    mNoFavoriteMoviesDisplay.setVisibility(View.INVISIBLE);
+                    SyncTaskUtils.syncMovieDetail(this, this, type);
+                } else {
+                    ArrayList<MovieDetail> popularMovies =
+                            DatabaseUtils.queryAllMovieFromDatabase(
+                                    this, DatabaseContract.TYPE_POPULAR);
+                    mMovieAdapter.setMovieData(popularMovies, DatabaseContract.TYPE_POPULAR);
+                    mLoadingIndicator.setVisibility(View.INVISIBLE);
+                    Log.d(TAG, "无网络");
+                }
                 setTitle(R.string.popular_movies);
                 break;
-            case TYPE_TOP_RATED:
-                mNoFavoriteMoviesDisplay.setVisibility(View.INVISIBLE);
-                SyncTaskUtils.syncMovie(this, NetworkUtils.QUERY_TOP_RATED_MOVIES_URL, SyncTaskUtils.CODE_MOVIE_DETAIL);
+            case DatabaseContract.TYPE_TOP_RATED:
+                if (NetworkUtils.isNetworkConnected(this)) {
+                    mNoFavoriteMoviesDisplay.setVisibility(View.INVISIBLE);
+                    SyncTaskUtils.syncMovieDetail(this, this, type);
+                } else {
+                    ArrayList<MovieDetail> topRatedMovies =
+                            DatabaseUtils.queryAllMovieFromDatabase(
+                                    this, DatabaseContract.TYPE_TOP_RATED);
+                    mMovieAdapter.setMovieData(topRatedMovies, DatabaseContract.TYPE_TOP_RATED);
+                    mLoadingIndicator.setVisibility(View.INVISIBLE);
+                    Log.d(TAG, "无网络");
+                }
                 setTitle(R.string.rated_movies);
                 break;
-            case TYPE_FAVORITE:
+            case DatabaseContract.TYPE_FAVORITE:
+                Log.d(TAG, "loadMovieData: " + type);
                 mLoadingIndicator.setVisibility(View.INVISIBLE);
-                List<MovieDetail> favoriteMovies = DataSupport.findAll(MovieDetail.class);
-                if (favoriteMovies.size() == 0) {
-                    mNoFavoriteMoviesDisplay.setVisibility(View.VISIBLE);
-                    mMovieAdapter.setMovieData(null);
-                    mMovieAdapter.notifyDataSetChanged();
-                } else {
-                    mNoFavoriteMoviesDisplay.setVisibility(View.INVISIBLE);
-                    ArrayList<MovieDetail> arrFavoriteMovies = new ArrayList<>();
-                    arrFavoriteMovies.addAll(favoriteMovies);
-                    mMovieAdapter.setMovieData(arrFavoriteMovies);
-                    mMovieAdapter.notifyDataSetChanged();
+                ArrayList<MovieDetail> favoriteMovies = DatabaseUtils.queryAllMovieFromDatabase(
+                        this, DatabaseContract.TYPE_FAVORITE);
+                if (favoriteMovies != null) {
+                    if (favoriteMovies.size() == 0) {
+                        mNoFavoriteMoviesDisplay.setVisibility(View.VISIBLE);
+                        mMovieAdapter.setMovieData(null, null);
+                        mMovieAdapter.notifyDataSetChanged();
+                    } else {
+                        mNoFavoriteMoviesDisplay.setVisibility(View.INVISIBLE);
+                        mMovieAdapter.setMovieData(favoriteMovies, type);
+                        mMovieAdapter.notifyDataSetChanged();
+                    }
                 }
                 setTitle(R.string.favorite_movie);
                 break;
-            default:
-                mNoFavoriteMoviesDisplay.setVisibility(View.INVISIBLE);
-                SyncTaskUtils.syncMovie(this, NetworkUtils.QUERY_POPULAR_MOVIES_URL, SyncTaskUtils.CODE_MOVIE_DETAIL);
-                setTitle(R.string.popular_movies);
         }
     }
 
@@ -181,21 +200,21 @@ public class MainActivity extends AppCompatActivity implements AsyncTaskComplete
         SharedPreferences.Editor editor = sharedPreferences.edit();
         switch (id) {
             case R.id.action_popular_refresh:
-                mMovieAdapter.setMovieData(null);
-                loadMovieData(TYPE_POPULAR);
-                editor.putString("now", TYPE_POPULAR);
+                mMovieAdapter.setMovieData(null, null);
+                loadMovieData(DatabaseContract.TYPE_POPULAR);
+                editor.putString(PREF_KEY_NOW, DatabaseContract.TYPE_POPULAR);
                 editor.apply();
                 return true;
             case R.id.action_top_rated_refresh:
-                mMovieAdapter.setMovieData(null);
-                loadMovieData(TYPE_TOP_RATED);
-                editor.putString("now", TYPE_TOP_RATED);
+                mMovieAdapter.setMovieData(null, null);
+                loadMovieData(DatabaseContract.TYPE_TOP_RATED);
+                editor.putString(PREF_KEY_NOW, DatabaseContract.TYPE_TOP_RATED);
                 editor.apply();
                 return true;
             case R.id.action_favorite_movie:
-                mMovieAdapter.setMovieData(null);
-                loadMovieData(TYPE_FAVORITE);
-                editor.putString("now", TYPE_FAVORITE);
+                mMovieAdapter.setMovieData(null, null);
+                loadMovieData(DatabaseContract.TYPE_FAVORITE);
+                editor.putString(PREF_KEY_NOW, DatabaseContract.TYPE_FAVORITE);
                 editor.apply();
                 return true;
         }
@@ -203,16 +222,21 @@ public class MainActivity extends AppCompatActivity implements AsyncTaskComplete
     }
 
     @Override
-    public void onTaskComplete(ArrayList result, int requestCode) {
-        if (requestCode == SyncTaskUtils.CODE_MOVIE_DETAIL) {
-            mLoadingIndicator.setVisibility(View.INVISIBLE);
-            if (result != null) {
-                showMovieDataView();
-                mMovieAdapter.setMovieData(result);
-                scrollToPosition();
-            } else {
-                showErrorMessage();
+    public void onTaskComplete(ArrayList result, String type) {
+        Log.d(TAG, "onTaskComplete: " + type);
+        mLoadingIndicator.setVisibility(View.INVISIBLE);
+        if (result != null) {
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+            String prefType = sharedPreferences.getString(PREF_KEY_NOW, PREF_VALUE_DEFAULT);
+            showMovieDataView();
+            mMovieAdapter.setMovieData(result, prefType);
+            scrollToPosition();
+            for (Object movieDetail : result) {
+                DatabaseUtils.saveMovieToDatabase(this, (MovieDetail) movieDetail, type);
             }
+            Log.d(TAG, "onTaskComplete: " + DatabaseUtils.queryAllMovieFromDatabase(this, type).size());
+        } else {
+            showErrorMessage();
         }
     }
 
@@ -221,18 +245,8 @@ public class MainActivity extends AppCompatActivity implements AsyncTaskComplete
         super.onResume();
         //如果在电影详情页修改了收藏状态，并且主页面在收藏电影页面，刷新数据并显示
         if (DetailActivity.CHECKED_CHANGED && TextUtils.equals(getTitle(), getResources().getString(R.string.favorite_movie))) {
-            List<MovieDetail> favoriteMovies = DataSupport.findAll(MovieDetail.class);
-            if (favoriteMovies.size() == 0) {
-                mNoFavoriteMoviesDisplay.setVisibility(View.VISIBLE);
-                mMovieAdapter.setMovieData(null);
-                mMovieAdapter.notifyDataSetChanged();
-            } else {
-                mNoFavoriteMoviesDisplay.setVisibility(View.INVISIBLE);
-                ArrayList<MovieDetail> arrFavoriteMovies = new ArrayList<>();
-                arrFavoriteMovies.addAll(favoriteMovies);
-                mMovieAdapter.setMovieData(arrFavoriteMovies);
-                mMovieAdapter.notifyDataSetChanged();
-            }
+            Log.d(TAG, "onResume: " + DetailActivity.CHECKED_CHANGED);
+            loadMovieData(DatabaseContract.TYPE_FAVORITE);
             DetailActivity.CHECKED_CHANGED = false;
         }
     }

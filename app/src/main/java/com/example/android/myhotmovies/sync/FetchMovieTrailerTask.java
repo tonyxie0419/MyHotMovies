@@ -2,10 +2,9 @@ package com.example.android.myhotmovies.sync;
 
 import android.os.AsyncTask;
 
-import com.example.android.myhotmovies.AsyncTaskCompleteListener;
+import com.example.android.myhotmovies.provider.DatabaseContract;
 import com.example.android.myhotmovies.utilities.NetworkUtils;
 import com.example.android.myhotmovies.utilities.OpenMovieJsonUtils;
-import com.example.android.myhotmovies.utilities.SyncTaskUtils;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -55,6 +54,6 @@ public class FetchMovieTrailerTask extends AsyncTask<String, Void, ArrayList<Str
 
     @Override
     protected void onPostExecute(ArrayList<String> result) {
-        mListener.onTaskComplete(result, SyncTaskUtils.CODE_MOVIE_TRAILER);
+        mListener.onTaskComplete(result, DatabaseContract.TYPE_TRAILER);
     }
 }
